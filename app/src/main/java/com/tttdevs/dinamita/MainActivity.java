@@ -37,8 +37,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         img = findViewById(R.id.imagen);
 
+        // Declaro el SensorManager
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
+        // Comportamiento al ahcer clic en la imágen
         img.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
+        // Sólo procedo si el juego estça "activo", es decir, no se detonó.
         if (!gameover) {
             // Obtengo el sensor a partir del evento recibido
             Sensor mySensor = sensorEvent.sensor;
@@ -87,7 +90,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                         // Vibrar medio segundo.
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                        v.vibrate(500);
+                        if (v != null) {
+                            v.vibrate(500);
+                        }
 
                         // Reproducir sonido
                         reproducirSonido("android.resource://com.tttdevs.dinamita/raw/boom");
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         gameover = true;
                     }
 
+                    // Guardo las coordenadas actuales para comparar con las próximas lecturas
                     last_x = x;
                     last_y = y;
                     last_z = z;
@@ -109,13 +115,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
+        // No se usa pero tiene que estar declarado
     }
 
+    // Este método se llama cuando la aplicación comienza a funcionar, sea cuando se abre por
+    // primera vez como cuando se sale y vuelve a entrar cambiando entre aplicaciones.
     @Override
     protected void onResume() {
         super.onResume();
         if (senSensorManager != null) {
+            // Necesario para que la aplicación reciba la información del acelerómetro
             senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -123,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     protected void onStop() {
+        // Cuando no voy a dejar de
         senSensorManager.unregisterListener(this);
         super.onStop();
     }

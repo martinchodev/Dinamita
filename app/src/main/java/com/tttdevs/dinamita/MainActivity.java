@@ -5,7 +5,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Vibrator;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +16,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -23,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float last_x, last_y, last_z;
     static final int SHAKE_THRESHOLD = 50;
     boolean gameover = false;
+    MediaPlayer mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         // Cambio la imágen por la de Game Over
                         img.setImageDrawable(getDrawable(R.drawable.gameover));
 
+                        // Vibrar medio segundo.
+                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        v.vibrate(500);
+
+                        // Reproducir sonido
+                        reproducirSonido("android.resource://com.tttdevs.dinamita/raw/boom");
+
                         // Cambio el estado de gameover a verdadero
                         gameover = true;
                     }
@@ -113,4 +126,45 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         senSensorManager.unregisterListener(this);
         super.onStop();
     }
+
+    // Método que recibe una ruta a un archivo de audio
+    // e inicializa mPlayer para que lo reproduzca
+    private void reproducirSonido(String ruta) {
+
+        // Creo un objeto de tipo Uri con la ruta al archivo mp3 recibida como argumento.
+        // Más adelante voy a usar esta Uri como argumento de un método de mPlayer.
+        Uri uriMp3 = Uri.parse(ruta);
+
+        // Creo una instancia de MediaPlayer
+        mPlayer = new MediaPlayer();
+
+        // Asigno onCompletionListener
+        mPlayer.setOnCompletionListener(onCompletionListener);
+
+        // Los siguientes 2 métodos de mPlayer requieren que se utilice try/catch
+        try {
+            // Le digo a mPlayer cuál es el archivo que va a reproducir
+            mPlayer.setDataSource(getApplicationContext(), uriMp3);
+
+            // Preparo mPlayer para la reproducción (buffer, etc)
+            mPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Reproduzco el sonido
+        mPlayer.start();
+
+        // Cuando finaliza la reproducción, se llama al onCompletionListener
+    }
+
+    // Este listener va a ser llamado cada vez que finalice la reproducción de un osnido
+    // para liberar los recursos del MediaPlayer
+    private MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            mp.release();
+            mPlayer = null;
+        }
+    };
 }

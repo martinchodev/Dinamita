@@ -1,7 +1,7 @@
 # Dinamita
 Aplicación de ejemplo para el curso de introducción al desarrollo en Android dictado en [Gran Reactor](https://granreactor.comg), en Febrero de 2018.
 
-Coordinador: [Martín Vukovic](https://martin.tttdevs.com)
+Coordinador: Martín Vukovic
 
 ![](Capturas/Dinamita1.png) ![](Capturas/Dinamita2.png)
 
